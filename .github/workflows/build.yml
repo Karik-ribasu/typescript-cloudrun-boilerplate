@@ -1,0 +1,21 @@
+name: Build project
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - master
+      - staging
+      - development
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build project
+        run: |
+          yarn
+          yarn build
