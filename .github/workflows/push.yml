@@ -2,7 +2,7 @@ name: push image to GCP
 on:
   push:
     branches:
-      - master
+      - main
       - development
       - staging
 
