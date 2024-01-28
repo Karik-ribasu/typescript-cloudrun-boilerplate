@@ -2,5 +2,8 @@
   "semi": true,
   "trailingComma": "es5",
   "singleQuote": true,
-  "endOfLine": "auto"
+  "endOfLine": "auto",
+  "useTabs": false,
+  "tabWidth": 2,
+  "filepath": "src/**/*.{js,jsx,ts,tsx,yml}"
 }
