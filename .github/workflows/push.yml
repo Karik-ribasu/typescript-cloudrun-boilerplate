@@ -27,8 +27,8 @@ jobs:
         run: echo $ENV
 
   build_and_push_image:
+    needs: set_env
     env:
-      needs: set_env
       IMAGE_NAME: typescript-boilerplate-${{ needs.jobs.set_env.outputs.env}}
       REGION: ${{ secrets.REGION }}
       REPO_NAME: ${{ secrets.REPO_NAME }}-${{ needs.jobs.set_env.outputs.env}}
