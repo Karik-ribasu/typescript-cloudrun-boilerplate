@@ -3,8 +3,8 @@
     "dev": "nodemon",
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "start": "node dist/main.js",
-    "test:ts": "jest",
-    "test:build": "jest dist/test/*",
+    "test:ts": "jest --testPathPattern=./test/**/*.ts",
+    "test:build": "jest --testPathPattern=./dist/test/*",
     "lint": "eslint src/**/*.ts test/**/*.test.ts --fix"
   },
   "devDependencies": {

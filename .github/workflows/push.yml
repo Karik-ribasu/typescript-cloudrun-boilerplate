@@ -1,0 +1,78 @@
+name: push image to GCP
+on:
+  push:
+    branches:
+      - master
+      - development
+      - staging
+
+jobs:
+  set_env:
+    runs-on: ubuntu-latest
+    outputs:
+      env: ${{ steps.set-env.outputs.ENV }}
+    steps:
+      - name: set-env
+        id: set_env
+        run: |
+          if [[ $GITHUB_REF == refs/heads/main ]]; then
+            echo "::set-output name=ENV::production"
+          elif [[ $GITHUB_REF == refs/heads/staging ]]; then
+            echo "::set-output name=ENV::staging"
+          elif [[ $GITHUB_REF == refs/heads/development ]]; then
+            echo "::set-output name=ENV::development"
+          fi
+
+      - name: display env
+        run: echo $ENV
+
+  build_and_push_image:
+    env:
+      needs: set_env
+      IMAGE_NAME: typescript-boilerplate-${{ needs.jobs.set_env.outputs.env}}
+      REGION: ${{ secrets.REGION }}
+      REPO_NAME: ${{ secrets.REPO_NAME }}-${{ needs.jobs.set_env.outputs.env}}
+      PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      SERVICE_ACCOUNT_EMAIL: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+      SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Auth gcloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ env.SERVICE_ACCOUNT_KEY }}
+          service_account: ${{ env.SERVICE_ACCOUNT_EMAIL }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Configure Docker Client
+        run: |-
+          gcloud auth configure-docker --quiet
+
+      - name: Automatic Tagging of Releases
+        id: increment-git-tag
+        run: |
+          git tag ${{github.run_id}}
+          git push origin ${{github.run_id}}
+          echo "::set-output name=git-tag::${{ github.run_id }}"
+
+      - name: Build project
+        run: |
+          yarn install
+          yarn build
+
+      - name: Build and Push Docker Image to Google Container Regisrty
+        env:
+          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+        run: |
+          gcloud auth configure-docker $REGION-docker.pkg.dev
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME .
+          docker tag $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:latest
+          docker tag $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:$GIT_TAG
+          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:latest
+          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:$GIT_TAG
