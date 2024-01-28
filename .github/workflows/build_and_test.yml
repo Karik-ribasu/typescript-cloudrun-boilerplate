@@ -20,10 +20,6 @@ jobs:
           yarn
           yarn build
 
-  test_build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
       - name: test project
         run: |
           yarn test:build
