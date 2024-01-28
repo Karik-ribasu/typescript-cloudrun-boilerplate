@@ -16,11 +16,11 @@ jobs:
         id: set_env
         run: |
           if [[ $GITHUB_REF == refs/heads/main ]]; then
-            echo "::set-output name=ENV::production"
+            echo "::set-output name=ENV::prod"
           elif [[ $GITHUB_REF == refs/heads/staging ]]; then
-            echo "::set-output name=ENV::staging"
+            echo "::set-output name=ENV::stg"
           elif [[ $GITHUB_REF == refs/heads/development ]]; then
-            echo "::set-output name=ENV::development"
+            echo "::set-output name=ENV::dev"
           fi
 
       - name: display env
