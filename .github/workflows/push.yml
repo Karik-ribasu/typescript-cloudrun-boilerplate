@@ -29,9 +29,9 @@ jobs:
   build_and_push_image:
     needs: set_env
     env:
-      IMAGE_NAME: typescript-boilerplate-${{ needs.jobs.set_env.outputs.env}}
+      IMAGE_NAME: typescript-boilerplate-${{ needs.set_env.outputs.env}}
       REGION: ${{ secrets.REGION }}
-      REPO_NAME: ${{ secrets.REPO_NAME }}-${{ needs.jobs.set_env.outputs.env}}
+      REPO_NAME: ${{ secrets.REPO_NAME }}-${{ needs.set_env.outputs.env}}
       PROJECT_ID: ${{ secrets.PROJECT_ID }}
       SERVICE_ACCOUNT_EMAIL: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
       SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
