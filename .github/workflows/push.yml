@@ -10,7 +10,7 @@ jobs:
   set_env:
     runs-on: ubuntu-latest
     outputs:
-      env: ${{ steps.set-env.outputs.ENV }}
+      env: ${{ steps.set_env.outputs.ENV }}
     steps:
       - name: set-env
         id: set_env
