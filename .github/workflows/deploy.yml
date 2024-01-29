@@ -18,7 +18,7 @@ jobs:
         run: |
           if [ -n "${{ github.ref_name }}" ]; then
             case "${{ github.ref_name }}" in
-              *[0-9]-stg) echo "::set-output name=ENV::stg" ;
+              *[0-9]-stg) echo "::set-output name=ENV::stg" ;;
               *[0-9]-prod) echo "::set-output name=ENV::prod" ;;
               *[0-9]-dev) echo "::set-output name=ENV::dev" ;;
             esac
