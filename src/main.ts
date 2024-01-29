@@ -1,7 +1,8 @@
-import { helloWorld } from '@src/hello-world';
+import * as express from 'express'
 
-function main() {
-  helloWorld();
-}
+const app = express.default()
+app.get('/', (req: express.Request, res: express.Response) => {
+  res.send('hello World')
+})
 
-main();
+app.listen((process.env.PORT || 3000), () => console.log('Server is running'))
