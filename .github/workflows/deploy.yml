@@ -43,15 +43,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Auth gcloud
-        uses: google-github-actions/auth@v1
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
         with:
-          credentials_json: ${{ env.SERVICE_ACCOUNT_KEY }}
-          service_account: ${{ env.SERVICE_ACCOUNT_EMAIL }}
+          version: '319.0.0'
           project_id: ${{ env.PROJECT_ID }}
-      - name: Deploy container image
-        id: 'deploy'
-        uses: 'google-github-actions/deploy-cloudrun@v2'
-        with:
-          service: ${{env.SERVICE_NAME}}
-          image: ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPO_NAME}}/${{env.IMAGE_NAME}}:${{inputs.tag}}
+          service_account_key: ${{ env.SERVICE_ACCOUNT_KEY }}
+          export_default_credentials: true
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME}} \
+            --image ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPO_NAME}}/${{env.IMAGE_NAME}}:${{inputs.tag}} \
+            --platform managed \
+            --region ${{env.REGION}}
