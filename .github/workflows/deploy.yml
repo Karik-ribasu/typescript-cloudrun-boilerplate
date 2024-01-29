@@ -16,12 +16,11 @@ jobs:
       - name: set-env
         id: set_env
         run: |
-          if [ -n "${{ github.event.inputs.tag }}" ]; then
-            case "${{ github.event.inputs.tag }}" in
-              *[0-9]-stg) echo "::set-output name=ENV::stg" ;;
-              *[0-9]-prd) echo "::set-output name=ENV::prod" ;;
+          if [ -n "${{ github.ref_name }}" ]; then
+            case "${{ github.ref_name }}" in
+              *[0-9]-stg) echo "::set-output name=ENV::stg" ;
+              *[0-9]-prod) echo "::set-output name=ENV::prod" ;;
               *[0-9]-dev) echo "::set-output name=ENV::dev" ;;
-              *) echo "::set-output name=ENV::unknown" ;;
             esac
           else
             echo "No tag provided, unable to determine environment."
@@ -38,7 +37,6 @@ jobs:
       PROJECT_ID: ${{ secrets.PROJECT_ID }}
       SERVICE_ACCOUNT_EMAIL: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
       SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
-      CLOUDSDK_PYTHON: '/usr/bin/python3'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -58,4 +56,4 @@ jobs:
         with:
           service: ${{ env.SERVICE_NAME }}
           region: ${{ env.REGION }}
-          image: ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPO_NAME}}/${{env.IMAGE_NAME}}:${{inputs.tag}}
+          image: ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPO_NAME}}/${{env.IMAGE_NAME}}:${{github.ref_name}}
