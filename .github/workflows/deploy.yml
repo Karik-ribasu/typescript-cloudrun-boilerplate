@@ -1,0 +1,57 @@
+name: Deploy container image to Cloud Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Git tag for the Docker image'
+        required: false
+
+jobs:
+  set_env:
+    runs-on: ubuntu-latest
+    outputs:
+      env: ${{ steps.set_env.outputs.ENV }}
+    steps:
+      - name: set-env
+        id: set_env
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            case "${{ github.event.inputs.tag }}" in
+              *[0-9]-stg) echo "::set-output name=ENV::stg" ;;
+              *[0-9]-prd) echo "::set-output name=ENV::prod" ;;
+              *[0-9]-dev) echo "::set-output name=ENV::dev" ;;
+              *) echo "::set-output name=ENV::unknown" ;;
+            esac
+          else
+            echo "No tag provided, unable to determine environment."
+            exit 1
+          fi
+
+  deploy:
+    needs: set_env
+    env:
+      SERVICE_NAME: typescript-boilerplate-${{ needs.set_env.outputs.env}}
+      IMAGE_NAME: typescript-boilerplate-${{ needs.set_env.outputs.env}}
+      REGION: ${{ secrets.REGION }}
+      REPO_NAME: ${{ secrets.REPO_NAME }}-${{ needs.set_env.outputs.env}}
+      PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      SERVICE_ACCOUNT_EMAIL: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+      SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Auth gcloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ env.SERVICE_ACCOUNT_KEY }}
+          service_account: ${{ env.SERVICE_ACCOUNT_EMAIL }}
+          project_id: ${{ env.PROJECT_ID }}
+      - name: Deploy container image
+        id: 'deploy'
+        uses: 'google-github-actions/deploy-cloudrun@v2'
+        with:
+          service: ${{env.SERVICE_NAME}}
+          image: ${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPO_NAME}}/${{env.IMAGE_NAME}}:${{inputs.tag}}
