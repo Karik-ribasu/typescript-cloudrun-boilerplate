@@ -44,6 +44,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          target-dir: '/usr/bin/python3'
+
       - name: Google Auth
         id: auth
         uses: 'google-github-actions/auth@v0'
