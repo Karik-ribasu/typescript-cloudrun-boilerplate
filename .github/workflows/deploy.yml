@@ -49,6 +49,10 @@ jobs:
         with:
           credentials_json: ${{ env.SERVICE_ACCOUNT_KEY }}
 
+      - run: |
+          sudo apt-get install python3.5
+          export CLOUDSDK_PYTHON="/usr/bin/python3"
+
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.0
         with:
